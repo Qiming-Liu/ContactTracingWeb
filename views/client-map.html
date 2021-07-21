@@ -1,0 +1,63 @@
+{% extends './client.html' %}
+{% block head %}
+<link rel="stylesheet" href="/css/status.css">
+{% endblock %}
+{% block client %}
+<div class="top"></div>
+<div class="card">
+    <div style="margin: 2rem 1.5rem 1.5rem">
+        <div id="map" style="height: 77vh"></div>
+        <div class="button-list" style="margin-top: 2rem">
+            <van-cell title=" Status" icon="img/good.png" is-link url="/status"></van-cell>
+            <van-divider></van-divider>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+    let v = new Vue({
+        el: '#client',
+        data: function () {
+            return {
+                markers: [],
+                map: ''
+            };
+        }
+    });
+
+    function initMap() {
+        v.map = new google.maps.Map(document.getElementById("map"), {
+            center: {lat: -34.9210435, lng: 138.6070086},
+            zoom: 14,
+            mapTypeControlOptions: {
+                mapTypeIds: [google.maps.MapTypeId.ROADMAP]
+            },
+            disableDefaultUI: true,
+            mapTypeControl: false,
+            streetViewControl: false,
+            scaleControl: true,
+            zoomControl: true,
+            zoomControlOptions: {
+                style: google.maps.ZoomControlStyle.LARGE
+            },
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            mapId: '{{ mapId }}'
+        });
+        axios({
+            method: 'post',
+            url: '/admin/markers',
+            data: {
+                type: '{{ mobile }}'
+            }
+        }).then(function (res) {
+            v.markers = res.data.markers;
+            for (let i = 0; i < v.markers.length; i++) {
+                v.markers[i].map = v.map;
+                new google.maps.Marker(v.markers[i]);
+            }
+        });
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ mapAPIKey }}&region=AU&language=en&callback=initMap&libraries=&v=weekly" async></script>
+{% endblock %}

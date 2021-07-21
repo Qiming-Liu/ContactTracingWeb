@@ -1,0 +1,27 @@
+#logo {
+    height: 64px;
+}
+
+.pd {
+    padding: 1.5rem 3rem
+}
+
+.content {
+    padding: 0 1.5rem;
+}
+
+.ant-descriptions {
+    text-align: center;
+    font-weight: bold;
+}
+
+.editor {
+    height: 20rem;
+}
+
+@media (max-width: 950px) {
+    .ant-layout-sider.ant-layout-sider-dark {
+        flex: 0 0 48px !important;
+        min-width: 0px !important;
+    }
+}

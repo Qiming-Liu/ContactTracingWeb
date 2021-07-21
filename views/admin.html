@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+    <title>Contact Tracing Admin</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ant-design-vue/1.7.5/antd.min.css"
+          integrity="sha512-jbBuNCUSkevoSRf29Op6bl4xtrjAaeyw5uuXdyMJ2qDlq2ZuK2v0fEVswgDFnZJeKfszO9XvuKU72mCDWQ3sog=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.css"
+          integrity="sha512-XMxqcAfuPHOh2Kz0Z3oDynUcLgyKP6B1NCKUTxyVbM02u1ZrygDcLddKw7KpN/SGmdw8raHbKgaIHP7+bEfGYw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+</head>
+<body>
+<div id="admin">
+    <a-layout>
+        <a-layout-header>
+            <img id="logo" src="/img/admin.png"/>
+        </a-layout-header>
+        <a-layout-content style="padding: 0 4rem">
+            <a-breadcrumb style="margin: 1rem 0.5rem">
+                <a-breadcrumb-item>{{ mobile }}</a-breadcrumb-item>
+                <a-breadcrumb-item>{{ name }}</a-breadcrumb-item>
+            </a-breadcrumb>
+            <a-layout style="padding: 1.5rem 0; background: #fff">
+                <a-layout-sider width="200" style="background: #fff">
+                    <a-menu
+                            mode="inline"
+                            :default-selected-keys="key">
+                        <a-menu-item key="map" v-on:click="jump_to('/admin/map')">
+                            <map-icon></map-icon>
+                            Map
+                        </a-menu-item>
+                        <a-menu-item key="venue" v-on:click="jump_to('/admin/venue')">
+                            <venue-icon></venue-icon>
+                            Venue
+                        </a-menu-item>
+                        <a-menu-item key="user" v-on:click="jump_to('/admin/user')">
+                            <user-icon></user-icon>
+                            User
+                        </a-menu-item>
+                        <a-menu-item key="exit" v-on:click="jump_to('/exit')">
+                            <exit-icon></exit-icon>
+                            Exit
+                        </a-menu-item>
+                    </a-menu>
+                </a-layout-sider>
+                <a-layout-content class="content">
+                    {% block content %}{% endblock %}
+                </a-layout-content>
+            </a-layout>
+        </a-layout-content>
+        <div class="pd">
+        </div>
+    </a-layout>
+</div>
+</body>
+<script src="/js/svg.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"
+        integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.js"
+        integrity="sha512-YXLGLsQBiwHPHLCAA9npZWhADUsHECjkZ71D1uzT2Hpop82/eLnmFb6b0jo8pK4T0Au0g2FETrRJNblF/46ZzQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ant-design-vue/1.7.5/antd.min.js"
+        integrity="sha512-im8CEF4W3nmiiw7p07B3SxQx6SBTYnuSyJrqO2CmeW5YoOH3xAfBDGVRs0x9BL8L8jqOhif7o8IxpZX/ttXeUQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"
+        integrity="sha512-P2W2rr8ikUPfa31PLBo5bcBQrsa+TNj8jiKadtaIrHQGMo6hQM6RdPjQYxlNguwHz8AwSQ28VkBK6kHBLgd/8g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-quill-editor@3.0.6/dist/vue-quill-editor.js"
+        integrity="sha256-UJcD0PwiIYKeNCkM9YDdI3lsrZitHZfl30rFtkM5l8Q=" crossorigin="anonymous"
+        referrerpolicy="no-referrer"></script>
+{% block script %}{% endblock %}
+</html>

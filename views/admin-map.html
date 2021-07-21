@@ -1,0 +1,67 @@
+{% extends './admin.html' %}
+{% block content %}
+<div id="map" style="height: 77vh"></div>
+{% endblock %}
+{% block script %}
+<script>
+    let v = new Vue({
+        el: '#admin',
+        components: svg_components,
+        data: function () {
+            return {
+                key: ['{{ key }}'],
+                markers: [],
+                map: '',
+                infoWindow: ''
+            }
+        },
+        methods: {
+            jump_to: function (url) {
+                window.location.href = url;
+            },
+            exit: function () {
+                window.location.replace('/exit');
+            }
+        }
+    });
+
+    function initMap() {
+        v.map = new google.maps.Map(document.getElementById("map"), {
+            center: {lat: -34.9210435, lng: 138.6070086},
+            zoom: 14,
+            mapTypeControlOptions: {
+                mapTypeIds: [google.maps.MapTypeId.ROADMAP]
+            },
+            disableDefaultUI: true,
+            mapTypeControl: false,
+            streetViewControl: false,
+            scaleControl: true,
+            zoomControl: true,
+            zoomControlOptions: {
+                style: google.maps.ZoomControlStyle.LARGE
+            },
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            mapId: '{{ mapId }}'
+        });
+        v.infoWindow = new google.maps.InfoWindow();
+        axios({
+            method: 'post',
+            url: '/admin/markers',
+            data: {
+                type: 'user'
+            }
+        }).then(function (res) {
+            v.markers = res.data.markers;
+            for (let i = 0; i < v.markers.length; i++) {
+                v.markers[i].map = v.map;
+                let marker = new google.maps.Marker(v.markers[i]);
+                marker.addListener("click", () => {
+                    v.infoWindow.setOptions(v.markers[i].info);
+                    v.infoWindow.open(v.map, marker);
+                });
+            }
+        });
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ mapAPIKey }}&region=AU&language=en&callback=initMap&libraries=&v=weekly" async></script>
+{% endblock %}

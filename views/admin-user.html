@@ -1,0 +1,219 @@
+{% extends './admin.html' %}
+{% block content %}
+<a-input-search placeholder="input search text" style="width: 15rem" @search="onSearch"></a-input-search>
+<a-dropdown>
+    <a-menu slot="overlay" @click="setRole">
+        <a-menu-item key="1">
+            <img src="/img/me.png" style="height: 2rem"/>
+            User
+        </a-menu-item>
+        <a-menu-item key="2">
+            <img src="/img/me+.png" style="height: 2rem"/>
+            Admin
+        </a-menu-item>
+    </a-menu>
+    <a-button> Set Role
+        <a-icon type="down"></a-icon>
+    </a-button>
+</a-dropdown>
+<a-dropdown>
+    <a-menu slot="overlay" @click="setStatus">
+        <a-menu-item key="1">
+            <img src="/img/good.png" style="height: 2rem"/>
+            Good
+        </a-menu-item>
+        <a-menu-item key="2">
+            <img src="/img/normal.png" style="height: 2rem"/>
+            Normal
+        </a-menu-item>
+        <a-menu-item key="3">
+            <img src="/img/bad.png" style="height: 2rem"/>
+            Bad
+        </a-menu-item>
+    </a-menu>
+    <a-button> Set Status
+        <a-icon type="down"></a-icon>
+    </a-button>
+</a-dropdown>
+<a-button @click="() => (emailDialog = true)">
+    <email-icon></email-icon>
+    Send Email
+</a-button>
+<a-modal
+        v-model="emailDialog"
+        title="Edit your email here"
+        centered
+        @ok="() => sentEmail()">
+    <quill-editor
+            ref="quillEditor"
+            class="editor"
+            v-model="content"
+            :options="editorOption">
+    </quill-editor>
+</a-modal>
+<br><br>
+<a-table
+        :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
+        :columns="columns"
+        :data-source="data"
+        ref="table">
+</a-table>
+{% endblock %}
+{% block script %}
+<script>
+    Vue.use(VueQuillEditor);
+    let v = new Vue({
+        el: '#admin',
+        components: svg_components,
+        data: function () {
+            return {
+                content: '',
+                editorOption: {
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline'],
+                            ['image']
+                        ]
+                    },
+                    placeholder: 'Input email here...',
+                    theme: 'snow'
+                },
+                emailDialog: false,
+                key: ['{{ key }}'],
+                selectedRowKeys: [],
+                columns: [
+                    {
+                        title: 'Mobile',
+                        dataIndex: 'mobile',
+                        scopedSlots: {customRender: 'mobile'},
+                    },
+                    {
+                        title: 'Role',
+                        dataIndex: 'role',
+                    },
+                    {
+                        title: 'Name',
+                        dataIndex: 'name',
+                    },
+                    {
+                        title: 'Email',
+                        dataIndex: 'email',
+                    },
+                    {
+                        title: 'Status',
+                        dataIndex: 'status',
+                    },
+                ],
+                data: [],
+                searchText: ''
+            }
+        },
+        methods: {
+            sentEmail: function () {
+                this.emailDialog = false;
+                let data = {};
+                data.rows = [];
+                let page = v.$refs.table.$children[0].$children[0].$children[1].current;
+                for (let i = 0; i < this.selectedRowKeys.length; i++) {
+                    data.rows.push(this.data[(page - 1) * 10 + this.selectedRowKeys[i]].email);
+                }
+                data.text = v.content;
+                axios({
+                    method: 'post',
+                    url: '/admin/email',
+                    data: data
+                }).then(function () {
+                    v.$notification['success']({
+                        message: 'Send Email Success'
+                    });
+                    v.selectedRowKeys = [];
+                });
+            },
+            jump_to: function (url) {
+                window.location.href = url;
+            },
+            exit: function () {
+                window.location.replace('/exit');
+            },
+            onSelectChange(selectedRowKeys) {
+                this.selectedRowKeys = selectedRowKeys;
+            },
+            onSearch(text) {
+                this.searchText = text;
+                axios({
+                    method: 'post',
+                    url: '/admin/search',
+                    data: {
+                        text: text
+                    }
+                }).then(function (res) {
+                    v.data = res.data.data;
+                });
+            },
+            setRole(e) {
+                let data = {};
+                switch (e.key) {
+                    case '1': {
+                        data.role = 'user'
+                        break;
+                    }
+                    case '2': {
+                        data.role = 'admin'
+                        break;
+                    }
+                }
+                data.rows = [];
+                let page = v.$refs.table.$children[0].$children[0].$children[1].current;
+                for (let i = 0; i < this.selectedRowKeys.length; i++) {
+                    data.rows.push(this.data[(page - 1) * 10 + this.selectedRowKeys[i]].mobile);
+                }
+                axios({
+                    method: 'post',
+                    url: '/admin/role',
+                    data: data
+                }).then(function () {
+                    v.$notification['success']({
+                        message: 'Set Status Success'
+                    });
+                    v.selectedRowKeys = [];
+                    v.onSearch(v.searchText);
+                });
+            },
+            setStatus(e) {
+                let data = {};
+                switch (e.key) {
+                    case '1': {
+                        data.status = 'Good'
+                        break;
+                    }
+                    case '2': {
+                        data.status = 'Normal'
+                        break;
+                    }
+                    case '3': {
+                        data.status = 'Bad'
+                        break;
+                    }
+                }
+                data.rows = [];
+                let page = v.$refs.table.$children[0].$children[0].$children[1].current;
+                for (let i = 0; i < this.selectedRowKeys.length; i++) {
+                    data.rows.push(this.data[(page - 1) * 10 + this.selectedRowKeys[i]].mobile);
+                }
+                axios({
+                    method: 'post',
+                    url: '/admin/status',
+                    data: data
+                }).then(function () {
+                    v.$notification['success']({
+                        message: 'Set Status Success'
+                    });
+                    v.selectedRowKeys = [];
+                    v.onSearch(v.searchText);
+                });
+            }
+        }
+    });
+    v.onSearch(v.searchText);
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends './client.html' %}
+{% block head %}
+<link rel="stylesheet" href="/css/status.css">
+{% endblock %}
+{% block client %}
+<div class="top"></div>
+<div class="card">
+    <div style="margin: 2rem 1.5rem 1.5rem">
+        <div style="margin-top: 5vh"></div>
+        <van-empty
+                class="status-img"
+                :description="status"
+                :image="statusImg">
+        </van-empty>
+        <van-cell-group style="margin: 0.5rem">
+            <van-cell class="van-ellipsis" title="Name:" :value="name"></van-cell>
+            <van-cell class="van-ellipsis" title="Mobile:" :value="mobile"></van-cell>
+        </van-cell-group>
+        <div class="button-list" style="margin-top: 2rem">
+            <van-cell title=" Map" icon="img/map.png" is-link url="/map"></van-cell>
+            <van-cell title=" History" icon="img/history.png" is-link url="/history"></van-cell>
+            <van-cell title=" Me" icon="img/me.png" is-link url="/me"></van-cell>
+            <van-cell title=" Exit" icon="img/exit.png" is-link url="/exit"></van-cell>
+            <van-divider></van-divider>
+        </div>
+    </div>
+</div>
+<div class="scan" onclick="window.location.href = '/scan'">
+    <van-image
+            radius="5"
+            width="40"
+            height="40"
+            fit="cover"
+            src="img/scan.png">
+    </van-image>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+    let v = new Vue({
+        el: '#client',
+        data: function () {
+            return {
+                name: '{{ name }}',
+                mobile: '{{ mobile }}',
+                status: '{{ status }}',
+                statusImg: '{{ statusImg }}'
+            };
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends './admin.html' %}
+{% block content %}
+<div id="map" style="height: 77vh"></div>
+{% endblock %}
+{% block script %}
+<script>
+    let v = new Vue({
+        el: '#admin',
+        components: svg_components,
+        data: function () {
+            return {
+                key: ['{{ key }}'],
+                markers: [],
+                map: '',
+                infoWindow: '',
+                pan: ''
+            }
+        },
+        methods: {
+            jump_to: function (url) {
+                window.location.href = url;
+            },
+            exit: function () {
+                window.location.replace('/exit');
+            }
+        }
+    });
+
+    function loadMarkers(){
+        axios({
+            method: 'post',
+            url: '/admin/markers',
+            data: {
+                type: 'venue'
+            }
+        }).then(function (res) {
+            v.markers = res.data.markers;
+            for (let i = 0; i < v.markers.length; i++) {
+                v.markers[i].map = v.map;
+                let marker = new google.maps.Marker(v.markers[i]);
+                marker.addListener("click", () => {
+                    v.infoWindow.setOptions(v.markers[i].info);
+                    v.infoWindow.open(v.map, marker);
+                });
+            }
+        });
+    }
+
+    function venue() {
+        let mobile = document.getElementById("om").value;
+        let name = document.getElementById("vn").value;
+        if (mobile.length === 9 && name.length !== 0){
+            axios({
+                method: 'post',
+                url: '/admin/create',
+                data: {
+                    mobile: document.getElementById("om").value,
+                    name: document.getElementById("vn").value,
+                    position: {
+                        lat: v.pan.getPosition().lat(),
+                        lng: v.pan.getPosition().lng()
+                    }
+                }
+            }).then(function () {
+                v.infoWindow.close();
+                loadMarkers();
+                v.$notification['success']({
+                    message: 'Create Venue Success'
+                });
+            });
+        } else {
+            v.$notification['error']({
+                message: 'Incorrect input'
+            });
+        }
+    }
+
+    function initMap() {
+        v.map = new google.maps.Map(document.getElementById("map"), {
+            center: {lat: -34.9210435, lng: 138.6070086},
+            zoom: 14,
+            mapTypeControlOptions: {
+                mapTypeIds: [google.maps.MapTypeId.ROADMAP]
+            },
+            disableDefaultUI: true,
+            mapTypeControl: false,
+            streetViewControl: false,
+            scaleControl: true,
+            zoomControl: true,
+            zoomControlOptions: {
+                style: google.maps.ZoomControlStyle.LARGE
+            },
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            mapId: '{{ mapId }}'
+        });
+        v.map.addListener('click', function (e) {
+            v.infoWindow.close();
+            try {
+                v.pan.setMap(null);
+            } catch (e) {
+            }
+            v.pan = new google.maps.Marker({
+                position: e.latLng,
+                map: v.map
+            });
+            v.pan.addListener("click", () => {
+                v.infoWindow.setOptions({
+                    content: `
+<div class="ant-card" style="width: 400px;">
+    <div class="ant-card-head">
+        <div class="ant-card-head-wrapper">
+            <div class="ant-card-head-title">[` + v.pan.getPosition().lat() + ', ' + v.pan.getPosition().lng() + `]</div>
+        </div>
+    </div>
+    <div class="ant-card-body">
+    <input
+        id="vn"
+        placeholder="Venue Name: Rundle Mall"
+        type="text"
+        maxlength="40"
+        class="ant-input"> <br><br>
+    <input
+        id="om"
+        placeholder="Owner Mobile: 499999999"
+        type="text"
+        maxlength="9"
+        oninput="value=this.value.replace(/\\D/g,'')"
+        class="ant-input"> <br><br>
+        <button type="button" class="ant-btn ant-btn-primary ant-btn-block" onclick="venue()"><span>Create Venue</span></button>
+    </div>
+</div>
+                    `
+                });
+                v.infoWindow.open(v.map, v.pan);
+            });
+            v.map.panTo(e.latLng);
+        });
+        v.infoWindow = new google.maps.InfoWindow();
+        loadMarkers();
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ mapAPIKey }}&region=AU&language=en&callback=initMap&libraries=&v=weekly"
+        async></script>
+{% endblock %}

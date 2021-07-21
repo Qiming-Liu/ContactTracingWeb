@@ -1,0 +1,22 @@
+body {
+    margin: 0 auto;
+    background-color: #f2f4f6;
+}
+
+.logo-img .van-empty__image {
+    width: 7rem;
+    height: 7rem;
+}
+
+.van-empty__description {
+    color: #000000 !important;
+    font-size: 1rem !important;
+    font-weight: bold;
+}
+
+@media (min-width: 608px) {
+    #client {
+        margin: 0 auto;
+        width: 608px;
+    }
+}

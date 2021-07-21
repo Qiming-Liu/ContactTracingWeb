@@ -1,0 +1,50 @@
+{% extends './client.html' %}
+{% block head %}
+<link rel="stylesheet" href="/css/status.css">
+<link rel="stylesheet" href="/css/scanner.css">
+{% endblock %}
+{% block client %}
+<div class="top"></div>
+<div class="card">
+    <div style="margin: 2rem 1.5rem 1.5rem">
+        <div style="margin-top: 5vh"></div>
+        <div id="reader"></div>
+        <div class="button-list" style="margin-top: 2rem">
+            <van-cell title=" Status" icon="img/good.png" is-link url="/status"></van-cell>
+            <van-divider></van-divider>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.js"
+        integrity="sha512-HNbo1d4BaJjXh+/e6q4enTyezg5wiXvY3p/9Vzb20NIvkJghZxhzaXeffbdJuuZSxFhJP87ORPadwmU9aN3wSA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="/js/jquery-input-file-text.min.js"></script>
+<script>
+    let v = new Vue({
+        el: '#client',
+        data: function () {
+            return {};
+        }
+    });
+    v.scanner = new Html5QrcodeScanner("reader", {fps: 10, qrbox: 250}, false);
+    v.scanner.render(qr => window.location.href = qr, qr => vant.Notify({
+        type: 'warning',
+        message: qr,
+        duration: 3000
+    }));
+    $('#reader__dashboard_section_csr button:first')
+        .click(function () {
+            let t = setInterval(function () {
+                let span = $('#reader__dashboard_section_csr span:first');
+                if (span.length) {
+                    span.html(span.html().slice(span.html().indexOf('<select ')));
+                    clearInterval(t);
+                }
+            }, 50);
+        });
+    $('#reader__filescan_input').inputFileText({text: 'Select Image'});
+
+</script>
+{% endblock %}

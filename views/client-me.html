@@ -1,0 +1,132 @@
+{% extends './client.html' %}
+{% block head %}
+<link rel="stylesheet" href="/css/index.css">
+{% endblock %}
+{% block client %}
+<van-nav-bar
+        title="Me"
+        :left-arrow=!showSteps
+        @click-left="onClickLeft">
+</van-nav-bar>
+<van-collapse v-model="collapse">
+    <van-collapse-item title="Mobile" name="1">
+        <van-field
+                v-model="mobile"
+                label="Mobile Number"
+                label-width="8rem"
+                placeholder="error"
+                readonly>
+        </van-field>
+    </van-collapse-item>
+    <van-collapse-item title="Name" name="1">
+        <van-field
+                v-model="name"
+                label="Preferred name"
+                label-width="8rem"
+                placeholder="John Smith">
+        </van-field>
+    </van-collapse-item>
+    <van-collapse-item title="Email" name="1">
+        <van-field
+                v-model="email"
+                label="Email"
+                label-width="4rem"
+                placeholder="johnsmith2021@google.com">
+        </van-field>
+    </van-collapse-item>
+    <van-collapse-item title="OAuth" name="1">
+        <van-field
+                name="switch"
+                label="Google"
+                label-width="8rem"
+                input-align="right">
+            <template #input>
+                <van-switch
+                        v-model="google"
+                        size="1.5rem"
+                        inactive-color="#ee0a24"
+                        disabled>
+                </van-switch>
+            </template>
+        </van-field>
+        <van-field
+                name="switch"
+                label="Facebook"
+                label-width="8rem"
+                input-align="right">
+            <template #input>
+                <van-switch
+                        v-model="facebook"
+                        size="1.5rem"
+                        inactive-color="#ee0a24"
+                        disabled>
+                </van-switch>
+            </template>
+        </van-field>
+    </van-collapse-item>
+</van-collapse>
+<div style="margin: 1.5rem">
+    <van-steps
+            :active="1"
+            v-show="showSteps">
+        <van-step>Account setup</van-step>
+        <van-step>Personal details</van-step>
+        <van-step>Check in</van-step>
+    </van-steps>
+</div>
+<div style="margin: 1.5rem">
+    <van-button
+            round
+            block
+            color="#800080"
+            v-on:click="onSubmit"
+            native-type="button">Enter
+    </van-button>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+    let v = new Vue({
+        el: '#client',
+        data: function () {
+            return {
+                collapse: ['1'],
+                mobile: '{{ mobile }}',
+                name: '{{ name }}',
+                email: '{{ email }}',
+                google: JSON.parse('{{ google }}'),
+                facebook: JSON.parse('{{ facebook }}'),
+                showSteps: JSON.parse('{{ showSteps }}'),
+                notify: '{{ notify }}'
+            };
+        },
+        methods: {
+            onClickLeft: function () {
+                window.location.href = '/status';
+            },
+            onSubmit: function () {
+                axios({
+                    method: 'post',
+                    url: '/enter',
+                    data: {
+                        mobile: this.mobile,
+                        name: this.name,
+                        email: this.email
+                    }
+                }).then(function (res) {
+                    if (res.data.enter) {
+                        window.location.replace(res.data.jump);
+                    }
+                });
+            },
+        }
+    });
+    if (v.notify !== '') {
+        vant.Notify({
+            type: 'warning',
+            message: 'Please input personal details',
+            duration: 3000
+        });
+    }
+</script>
+{% endblock %}

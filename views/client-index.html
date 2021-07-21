@@ -1,0 +1,217 @@
+{% extends './client.html' %}
+{% block head %}
+<link rel="stylesheet" href="/css/index.css">
+{% endblock %}
+{% block client %}
+<div style="margin-top: 4rem">
+    <van-empty
+            class="logo-img"
+            description="Contact Tracing"
+            image="img/logo.png">
+    </van-empty>
+</div>
+<div style="margin-top: 3rem">
+    <van-form @submit="onSubmit">
+        <van-field
+                v-model="mobile"
+                label="Mobile Number"
+                label-width="8rem"
+                maxlength="9"
+                placeholder="412345678">
+        </van-field>
+        <van-field
+                v-model="verify"
+                label="Verify Code"
+                label-width="8rem"
+                maxlength="4"
+                :onkeyup="verify=verify.replace(/[^\d\.]/g,'')"
+                placeholder="4 digits">
+        </van-field>
+        <van-field
+                name="switch"
+                label="Verify Simulation"
+                label-width="8rem"
+                input-align="right">
+            <template #input>
+                <van-switch v-model="switchChecked" size="1.5rem"></van-switch>
+            </template>
+        </van-field>
+        <div style="margin: 1.5rem;">
+            <van-button
+                    round
+                    block
+                    :disabled="sending"
+                    :loading="sending"
+                    :loading-text="sendText"
+                    color="#800080"
+                    v-on:click="sent_code"
+                    native-type="button">Send code
+            </van-button>
+        </div>
+        <div style="margin: 1.5rem;">
+            <van-button
+                    round
+                    block
+                    :disabled="!sending"
+                    :loading="submitting"
+                    color="#800080"
+                    native-type="submit">Sign in / Sign up
+            </van-button>
+        </div>
+    </van-form>
+</div>
+<van-tabbar>
+    <van-tabbar-item url="/google">
+        <template #icon="props">
+            <img :src="tabbar.google"/>
+        </template>
+    </van-tabbar-item>
+    <van-tabbar-item url="/facebook">
+        <template #icon="props">
+            <img :src="tabbar.facebook"/>
+        </template>
+    </van-tabbar-item>
+</van-tabbar>
+{% endblock %}
+{% block script %}
+<script>
+    let v = new Vue({
+        el: '#client',
+        data: function () {
+            return {
+                mobile: '',
+                verify: '',
+                switchChecked: true,
+                sending: false,
+                submitting: false,
+                sendText: '',
+                sendInterval: 0,
+                tabbar: {
+                    google: '/img/google.png',
+                    facebook: '/img/facebook.png'
+                },
+                OAuth: '{{ OAuth }}'
+            };
+        },
+        methods: {
+            sent_code: function () {
+                if (this.mobile.length !== 0) {
+                    if (new RegExp('{{ mobileRegex }}').test(this.mobile)) {
+                        let defaultSendInterval = '{{ defaultSendInterval }}';
+                        if (this.sendInterval === 0) {
+                            this.sendInterval = parseInt(defaultSendInterval);
+                            this.sending = true;
+                        }
+                        axios({
+                            method: 'post',
+                            url: '/verify',
+                            data: {
+                                sim: this.switchChecked,
+                                mobile: this.mobile
+                            }
+                        }).then(function (res) {
+                            if (res.data.sim) {
+                                vant.Notify({
+                                    type: 'success',
+                                    message: 'Your code is ' + res.data.code,
+                                    duration: parseInt(defaultSendInterval)
+                                });
+                            }
+                        });
+                    } else {
+                        vant.Notify({
+                            type: 'warning',
+                            message: 'Incorrect mobile number format',
+                            duration: 3000
+                        });
+                    }
+                } else {
+                    vant.Notify({
+                        type: 'warning',
+                        message: 'Please input mobile number',
+                        duration: 3000
+                    });
+                }
+            },
+            onSubmit: function () {
+                if (this.mobile.length === 9 && this.verify.length === 4) {
+                    if (!this.switchChecked) {
+                        this.submitting = true;
+                    }
+                    axios({
+                        method: 'post',
+                        url: '/sign',
+                        data: {
+                            mobile: this.mobile,
+                            code: this.verify,
+                            sim: this.switchChecked,
+                            OAuth: this.OAuth
+                        }
+                    }).then(function (res) {
+                        if (res.data.verify) {
+                            window.location.replace(res.data.jump);
+                        } else {
+                            switch (res.data.reason) {
+                                case 'incorrect': {
+                                    vant.Notify({
+                                        type: 'danger',
+                                        message: 'Incorrect verify code',
+                                        duration: 3000
+                                    });
+                                    break;
+                                }
+                                case 'denied': {
+                                    let defaultSendInterval = '{{ defaultSendInterval }}';
+                                    vant.Notify({
+                                        type: 'danger',
+                                        message: 'Please try again ' + (defaultSendInterval / 1000) + 's later',
+                                        duration: 3000
+                                    });
+                                    break;
+                                }
+                                case 'overtime': {
+                                    vant.Notify({
+                                        type: 'danger',
+                                        message: 'Please send code again',
+                                        duration: 3000
+                                    });
+                                    break;
+                                }
+                                case 'error': {
+                                    vant.Notify({
+                                        type: 'danger',
+                                        message: 'Sever error',
+                                        duration: 3000
+                                    });
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    vant.Notify({
+                        type: 'warning',
+                        message: 'Incorrect mobile number or verify code',
+                        duration: 3000
+                    });
+                }
+            },
+        }
+    });
+    setInterval(function () {
+        if (v.sendInterval > 0) {
+            v.sendInterval = v.sendInterval - 1000;
+            v.sendText = 'Send Again ' + (v.sendInterval / 1000) + 's';
+        } else {
+            v.sending = false;
+        }
+    }, 1000);
+    if (v.OAuth !== '') {
+        vant.Notify({
+            type: 'warning',
+            message: 'Please sign up for OAuth',
+            duration: 3000
+        });
+    }
+</script>
+{% endblock %}

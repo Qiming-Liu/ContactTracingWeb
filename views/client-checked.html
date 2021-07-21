@@ -1,0 +1,32 @@
+{% extends './client.html' %}
+{% block head %}
+<link rel="stylesheet" href="/css/status.css">
+{% endblock %}
+{% block client %}
+<div class="top"></div>
+<div class="card">
+    <div style="margin: 2rem 1.5rem 1.5rem">
+        <div style="margin-top: 5vh"></div>
+        <van-empty
+                class="status-img"
+                description="Checked In"
+                image="/img/checked.png">
+        </van-empty>
+        <van-divider>Thank you!</van-divider>
+        <div class="button-list" style="margin-top: 2rem">
+            <van-cell title=" Status" icon="img/good.png" is-link url="/status"></van-cell>
+            <van-divider></van-divider>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+    let v = new Vue({
+        el: '#client',
+        data: function () {
+            return {};
+        }
+    });
+</script>
+{% endblock %}
