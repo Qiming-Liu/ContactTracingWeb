@@ -1,4 +1,13 @@
 # COVID-19 Contact Tracing Web Application
+![Intro](https://github.com/Qiming-Liu/ContactTracingWeb/raw/main/intro.png "Intro")  
+
+## Intro Images
+Login  
+![Login](https://github.com/Qiming-Liu/ContactTracingWeb/raw/main/img/1.png "Login")  
+ScanPage  
+![ScanPage](https://github.com/Qiming-Liu/ContactTracingWeb/raw/main/img/2.png "ScanPage")  
+AdminPage  
+![AdminPage](https://github.com/Qiming-Liu/ContactTracingWeb/raw/main/img/3.png "AdminPage")  
 
 ## How to run?
 #### Database
